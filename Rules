@@ -9,6 +9,8 @@ preprocess do
   config[:nanoc_version_info] = Nanoc.version_information
   config[:gem_version_info]   = Gem::VERSION
   config[:ruby_version_info]  = `ruby --version`.strip
+
+  @items.create('', { is_hidden: true }, '/search-index.erb')
 end
 
 layout '/**/*', :erb
@@ -71,6 +73,27 @@ end
 
 route '/404.*' do
   '/404.html'
+end
+
+## search
+
+compile '/**/*.{md,html,erb}', rep: :search do
+  filter :erb if item[:is_dynamic]
+  filter :kramdown if 'md' == item[:extension]
+  filter :admonition
+  filter :to_search_json
+end
+
+route '/**/*.{md,html,erb}', rep: :search do
+  nil
+end
+
+compile '/search-index.*' do
+  layout '/search-index.*'
+end
+
+route '/search-index.*' do
+  '/search-index.json'
 end
 
 # fallback

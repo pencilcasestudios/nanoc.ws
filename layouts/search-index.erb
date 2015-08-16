@@ -1,0 +1,1 @@
+[<%= @items.reject { |i| i[:is_hidden] || i.path.nil? }.map { |i| i.reps[:search] }.compact.map { |r| r.compiled_content }.join(',') %>]
