@@ -1,3 +1,5 @@
+require 'coderay'
+
 class NanocWsHTMLTranslator < NanocWsCommonTranslator
   include Nanoc::Helpers::HTMLEscape
 
@@ -15,7 +17,11 @@ class NanocWsHTMLTranslator < NanocWsCommonTranslator
   # Abstract methods
 
   def handle_string(string, context)
-    [h(string)]
+    if context[:html_escape]
+      [h(string)]
+    else
+      [string]
+    end
   end
 
   def handle_element(element, context)
@@ -126,7 +132,12 @@ class NanocWsHTMLTranslator < NanocWsCommonTranslator
 
     wrap('pre', pre_attrs) do
       wrap('code', code_attrs) do
-        handle_children(element, context)
+        if element.attributes['lang']
+          addition = translate(element.children, context.merge(html_escape: false))
+          CodeRay.scan(addition, element.attributes['lang']).html
+        else
+          translate(element.children, context)
+        end
       end
     end
   end
